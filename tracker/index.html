@@ -1,0 +1,217 @@
+<title>Job Hunt Board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* layout: pipeline strip on top, one dense table below; rows expand inline into a detail panel */
+:root {
+  --bg: #f6f7f6; --surface: #ffffff; --fg: #1c2321; --muted: #5d6965; --line: #dde3e0;
+  --accent: #1f6f5c; --accent-soft: #e2f0ec;
+  --good: #217a3c; --warn: #9a6a00; --bad: #b23a2e;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121715; --surface: #1a201e; --fg: #e3e9e6; --muted: #93a19c; --line: #2c3532;
+  --accent: #5cc3a6; --accent-soft: #1e3530; --good: #6ccf86; --warn: #e0b04a; --bad: #f08273; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #121715; --surface: #1a201e; --fg: #e3e9e6; --muted: #93a19c; --line: #2c3532;
+  --accent: #5cc3a6; --accent-soft: #1e3530; --good: #6ccf86; --warn: #e0b04a; --bad: #f08273; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font: 14px/1.45 var(--sans);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px 48px; }
+main { max-width: 1100px; margin: 0 auto; display: grid; gap: 16px; }
+h1 { font-size: 22px; font-weight: 600; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 2px 0 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 13px var(--sans); border: 1px solid var(--line); background: var(--surface); color: var(--fg);
+  border-radius: 999px; padding: 4px 12px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.chip .n { font-family: var(--mono); opacity: .75; margin-left: 4px; }
+.chip:focus-visible, button:focus-visible, select:focus-visible, textarea:focus-visible, th:focus-visible, tr:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.notice { color: var(--muted); }
+.notice.err { color: var(--bad); }
+.tablewrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+table { width: 100%; border-collapse: collapse; min-width: 720px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); cursor: pointer; user-select: none; white-space: nowrap; }
+th[aria-sort="ascending"]::after { content: " \2191"; } th[aria-sort="descending"]::after { content: " \2193"; }
+tr.row { cursor: pointer; }
+tr.row:hover td { background: var(--accent-soft); }
+tr.row.open td { background: var(--accent-soft); border-bottom-color: transparent; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.co { font-weight: 600; }
+.role { color: var(--muted); }
+.score { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 6px; font: 500 13px var(--mono); background: var(--accent-soft); color: var(--accent); }
+.score.s5, .score.s4 { background: var(--accent); color: var(--bg); }
+.pay-yes { color: var(--good); } .pay-no { color: var(--bad); } .pay-unknown { color: var(--muted); }
+.status { font: 500 12px var(--sans); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--line); white-space: nowrap; }
+.st-applied, .st-interview { border-color: var(--accent); color: var(--accent); }
+.st-offer { background: var(--good); border-color: var(--good); color: var(--bg); }
+.st-rejected, .st-dropped { color: var(--muted); text-decoration: line-through; }
+.flag { display: inline-block; font-size: 11px; color: var(--warn); border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; margin: 2px 4px 0 0; }
+td.detail { padding: 4px 12px 16px; }
+.detail-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 20px; }
+@media (max-width: 760px) { .detail-grid { grid-template-columns: minmax(0, 1fr); } }
+.detail h3 { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 10px 0 4px; }
+.detail p { margin: 0; max-width: 65ch; }
+.detail a { color: var(--accent); word-break: break-all; }
+.notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.notes li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; }
+.notes .num { color: var(--muted); }
+textarea, select { font: 14px var(--sans); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+textarea { width: 100%; box-sizing: border-box; min-height: 56px; resize: vertical; }
+.addnote { display: grid; gap: 6px; margin-top: 8px; }
+button.primary { justify-self: start; font: 500 13px var(--sans); background: var(--accent); color: var(--bg); border: 0; border-radius: 6px; padding: 6px 14px; cursor: pointer; }
+button.primary:disabled { opacity: .5; cursor: default; }
+.empty { padding: 32px 16px; text-align: center; color: var(--muted); }
+.empty code { font-family: var(--mono); color: var(--fg); }
+</style>
+
+<main>
+  <header>
+    <h1>Job Hunt Board</h1>
+    <p class="sub" id="summary">Loading jobs…</p>
+  </header>
+  <nav class="chips" id="chips" aria-label="Filter by status"></nav>
+  <p class="notice" id="notice" hidden></p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr id="head"></tr></thead>
+      <tbody id="body"></tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+const STATUSES = ["new", "interested", "applied", "interview", "offer", "rejected", "dropped"];
+const ACTIVE = ["new", "interested", "applied", "interview", "offer"];
+const COLS = [
+  { key: "score", label: "Score" },
+  { key: "company", label: "Company / role" },
+  { key: "office", label: "Office" },
+  { key: "pay", label: "Pay" },
+  { key: "status", label: "Status" },
+  { key: "found", label: "Found" },
+];
+
+let db = null, jobs = [], filter = "active", sort = { key: "score", dir: -1 }, openId = null;
+const $ = (id) => document.getElementById(id);
+const el = (tag, attrs = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) k === "class" ? (n.className = v) : n.setAttribute(k, v);
+  for (const c of kids) if (c != null) n.append(c);
+  return n;
+};
+const safeUrl = (u) => (/^https?:\/\//i.test(u || "") ? u : null);
+const today = () => new Date().toISOString().slice(0, 10);
+
+function notice(text, err) { const n = $("notice"); n.hidden = !text; n.textContent = text || ""; n.classList.toggle("err", !!err); }
+
+function visible() {
+  const list = jobs.filter((j) => filter === "all" || (filter === "active" ? ACTIVE.includes(j.status) : j.status === filter));
+  const { key, dir } = sort;
+  return list.sort((a, b) => {
+    const x = a[key] ?? "", y = b[key] ?? "";
+    if (x === y) return (b.found || "").localeCompare(a.found || "");
+    return (typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y))) * dir;
+  });
+}
+
+function renderChips() {
+  const count = (s) => jobs.filter((j) => j.status === s).length;
+  const items = [["active", "Active", jobs.filter((j) => ACTIVE.includes(j.status)).length],
+    ...STATUSES.map((s) => [s, s[0].toUpperCase() + s.slice(1), count(s)]), ["all", "All", jobs.length]];
+  $("chips").replaceChildren(...items.map(([k, label, n]) => {
+    const b = el("button", { class: "chip", "aria-pressed": String(filter === k), type: "button" }, label, el("span", { class: "n" }, String(n)));
+    b.onclick = () => { filter = k; render(); };
+    return b;
+  }));
+  const applied = jobs.filter((j) => ["applied", "interview", "offer"].includes(j.status)).length;
+  $("summary").textContent = jobs.length
+    ? `${jobs.length} jobs tracked · ${count("new")} new to review · ${applied} in progress`
+    : "No jobs yet.";
+}
+
+function renderHead() {
+  $("head").replaceChildren(...COLS.map((c) => {
+    const th = el("th", { tabindex: "0", scope: "col" }, c.label);
+    if (sort.key === c.key) th.setAttribute("aria-sort", sort.dir > 0 ? "ascending" : "descending");
+    const go = () => { sort = { key: c.key, dir: sort.key === c.key ? -sort.dir : (c.key === "score" || c.key === "found" ? -1 : 1) }; render(); };
+    th.onclick = go; th.onkeydown = (e) => { if (e.key === "Enter") go(); };
+    return th;
+  }));
+}
+
+function detailRow(j) {
+  const links = el("p");
+  (j.links || []).forEach((u, i) => { const s = safeUrl(u); if (s) { if (i) links.append(" · "); links.append(el("a", { href: s, target: "_blank", rel: "noopener" }, new URL(s).hostname)); } });
+
+  const sel = el("select", { id: "status-" + j.id, "aria-label": "Status" }, ...STATUSES.map((s) => { const o = el("option", { value: s }, s); if (s === j.status) o.selected = true; return o; }));
+  sel.onchange = () => write(j.id, { status: sel.value });
+
+  const notes = el("ol", { class: "notes" }, ...(j.notes || []).map((n) => el("li", {}, el("span", { class: "num" }, n.date || ""), el("span", {}, n.text || ""))));
+  if (!(j.notes || []).length) notes.append(el("li", { class: "role" }, el("span"), el("span", {}, "No notes yet.")));
+  const ta = el("textarea", { id: "note-" + j.id, placeholder: "e.g. Sent CV via LinkedIn; recruiter call Tuesday", "aria-label": "New note" });
+  const add = el("button", { class: "primary", type: "button" }, "Add note");
+  add.onclick = async () => {
+    const text = ta.value.trim(); if (!text) return;
+    add.disabled = true;
+    if (await write(j.id, { notes: [...(j.notes || []), { date: today(), text }] })) ta.value = "";
+    add.disabled = false;
+  };
+
+  const left = el("div", {},
+    el("h3", {}, "Why"), el("p", {}, j.why || "-"),
+    el("h3", {}, "Summary"), el("p", {}, j.summary || "-"),
+    el("h3", {}, "Where"), el("p", {}, [j.location, j.source].filter(Boolean).join(" · ") || "-"),
+    el("h3", {}, "Links"), links);
+  const right = el("div", {},
+    el("h3", {}, "Status"), sel,
+    el("h3", {}, "Log"), notes,
+    el("div", { class: "addnote" }, ta, add));
+  return el("tr", {}, el("td", { class: "detail", colspan: String(COLS.length) }, el("div", { class: "detail-grid" }, left, right)));
+}
+
+function render() {
+  renderChips(); renderHead();
+  const rows = [];
+  const list = visible();
+  if (!list.length) {
+    rows.push(el("tr", {}, el("td", { colspan: String(COLS.length), class: "empty" },
+      jobs.length ? "Nothing in this view." : el("span", {}, "Run ", el("code", {}, "/scan"), " in Claude Code inside the job-hunt repo; new jobs appear here."))));
+  }
+  for (const j of list) {
+    const tr = el("tr", { class: "row" + (openId === j.id ? " open" : ""), tabindex: "0", "aria-expanded": String(openId === j.id) },
+      el("td", {}, el("span", { class: "score s" + (j.score || 0) }, String(j.score ?? "-"))),
+      el("td", {}, el("div", { class: "co" }, j.company || "?"), el("div", { class: "role" }, j.title || ""),
+        ...(j.flags || []).map((f) => el("span", { class: "flag" }, f))),
+      el("td", {}, j.office || "unknown"),
+      el("td", { class: "pay-" + (j.pay_ok || "unknown") }, j.pay || "not stated"),
+      el("td", {}, el("span", { class: "status st-" + j.status }, j.status || "new")),
+      el("td", { class: "num" }, j.found || ""));
+    const toggle = () => { openId = openId === j.id ? null : j.id; render(); };
+    tr.onclick = toggle; tr.onkeydown = (e) => { if (e.key === "Enter") toggle(); };
+    rows.push(tr);
+    if (openId === j.id) rows.push(detailRow(j));
+  }
+  $("body").replaceChildren(...rows);
+}
+
+async function write(id, patch) {
+  if (!db) return false;
+  try { await db.doc("jobs/" + id).update(patch); notice(""); return true; }
+  catch (e) { notice(e.code === "invalid_argument" ? "You can view this board but not change it." : "Couldn't save: " + (e.message || e.code), true); return false; }
+}
+
+render();
+(async () => {
+  db = window.claude ? await window.claude.use("db") : null;
+  if (!db) { $("summary").textContent = "The job store isn't available in this view. Open the board on claude.ai while signed in."; return; }
+  const timer = setTimeout(() => notice("Can't reach the job store yet; showing what's loaded."), 10000);
+  db.collection("jobs").onSnapshot((snap) => {
+    if (!snap.metadata.fromCache) { clearTimeout(timer); notice(""); }
+    jobs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    render();
+  }, (e) => { clearTimeout(timer); notice("Lost connection to the job store (" + e.code + "). Reload to try again.", true); });
+})();
+</script>
