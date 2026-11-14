@@ -1,0 +1,4 @@
+# personal data - each user keeps their own
+profile.md
+*.pdf
+.claude/settings.local.json
