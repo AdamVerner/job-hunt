@@ -23,9 +23,12 @@ and you decide on the board with its filters (status, stack, office, source).
 - Terms: keywords used on every source, e.g. python, .NET, backend, fullstack
 
 ## Companies to watch
-`/scan` reads every opening at these companies, even ones no search term matches. Give the careers page,
-or the job board if you know it (Greenhouse, Lever or Ashby slug).
+`/scan` reads every opening at the companies in `companies.md` plus the ones you add here, even when no
+search term matches. Give the careers page or job board URL.
 - e.g. Acme - https://boards-api.greenhouse.io/v1/boards/acme/jobs
+
+Skip (never scanned, e.g. your current employer):
+- e.g. Acme
 
 ## Dealbreakers
 A job matching any of these is saved as `dropped` with the reason, so it won't come back.

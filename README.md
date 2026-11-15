@@ -33,4 +33,6 @@ Everything personal is in `profile.md`:
 
 Keep dealbreakers few. Filter the rest on the board.
 
+`companies.md` lists employers whose own job boards `/scan` reads directly; add a row when you find one that keyword searches miss.
+
 `sources.md` has sources that work anywhere, plus a Czech section that is skipped outside Czechia. To add a site for your country, add a row with its search URL.

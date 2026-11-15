@@ -28,7 +28,7 @@ Skip this section when the profile's city is not in Czechia.
 
 ## Watched companies
 
-The companies listed in `profile.md` > Companies to watch. Read every opening, regardless of search terms: firms that post only on their own site never show up in keyword searches.
+The companies in `companies.md` and in `profile.md` > Companies to watch. Read every opening, regardless of search terms: firms that post only on their own site never show up in keyword searches.
 
 | Board | List URL | Notes |
 |---|---|---|
