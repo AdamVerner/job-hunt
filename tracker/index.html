@@ -63,6 +63,7 @@ tr.row.open td { background: var(--accent-soft); border-bottom-color: transparen
 .star.on, .star:hover { color: var(--warn); }
 .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .tech { font: 500 11px var(--mono); color: var(--accent); background: var(--accent-soft); border-radius: 4px; padding: 0 5px; }
+.dropwhy { font-size: 13px; color: var(--bad); margin-top: 2px; }
 .flag { font-size: 11px; color: var(--warn); border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; }
 td.detail { padding: 4px 12px 16px; }
 .detail-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 20px; }
@@ -121,6 +122,7 @@ button.primary:disabled { opacity: .5; cursor: default; }
   <nav class="chips" id="stacks" aria-label="Filter by technology"></nav>
   <nav class="chips" id="modes" aria-label="Filter by office policy"></nav>
   <nav class="chips" id="sources" aria-label="Filter by source"></nav>
+  <nav class="chips" id="flags" aria-label="Filter by flag"></nav>
   <label class="sortbar" for="sortsel">Sort
     <select id="sortsel">
       <option value="score">Best score</option>
@@ -150,7 +152,7 @@ const COLS = [
 ];
 const DEFAULT_DIR = { score: -1, found: -1 };
 
-let jobs = [], filter = "active", facets = { stack: "all", mode: "all", source: "all" }, sort = { key: "score", dir: -1 }, openId = null;
+let jobs = [], filter = "active", facets = { stack: "all", mode: "all", source: "all", flag: "all" }, sort = { key: "score", dir: -1 }, openId = null;
 const $ = (id) => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => {
   const n = document.createElement(tag);
@@ -173,6 +175,7 @@ const FACETS = [
   { key: "stack", nav: "stacks", label: "Stack", values: (j) => j.stack || [] },
   { key: "mode", nav: "modes", label: "Office", values: (j) => [mode(j)] },
   { key: "source", nav: "sources", label: "Source", values: (j) => [j.source || "?"] },
+  { key: "flag", nav: "flags", label: "Flags", values: (j) => ((j.flags || []).length ? j.flags : ["No flags"]) },
 ];
 const byFacets = (j) => FACETS.every((f) => facets[f.key] === "all" || f.values(j).includes(facets[f.key]));
 
@@ -281,6 +284,7 @@ function render() {
     const tr = el("tr", { class: "row" + (openId === j.id ? " open" : ""), tabindex: "0", "aria-expanded": String(openId === j.id) },
       el("td", { class: "c-score" }, el("span", { class: "score s" + (j.score || 0) }, String(j.score ?? "-"))),
       el("td", { class: "c-main" }, el("div", { class: "co" }, j.company || "?"), el("div", { class: "role" }, j.title || ""),
+        j.status === "dropped" && j.why ? el("div", { class: "dropwhy" }, "Dropped: " + j.why) : null,
         el("div", { class: "tags" }, ...(j.stack || []).map((s) => el("span", { class: "tech" }, s)), ...(j.flags || []).map((f) => el("span", { class: "flag" }, f)))),
       el("td", { class: "c-office" }, j.office || "unknown"),
       el("td", { class: "c-pay pay-" + (j.pay_ok || "unknown") }, j.pay || "not stated"),
