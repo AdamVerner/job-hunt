@@ -76,6 +76,7 @@ button.primary:disabled { opacity: .5; cursor: default; }
   </header>
   <nav class="chips" id="chips" aria-label="Filter by status"></nav>
   <nav class="chips" id="stacks" aria-label="Filter by technology"></nav>
+  <nav class="chips" id="modes" aria-label="Filter by office policy"></nav>
   <p class="notice" id="notice" hidden></p>
   <div class="tablewrap">
     <table>
@@ -97,7 +98,7 @@ const COLS = [
   { key: "found", label: "Found" },
 ];
 
-let db = null, jobs = [], filter = "active", stackFilter = "all", sort = { key: "score", dir: -1 }, openId = null;
+let db = null, jobs = [], filter = "active", facets = { stack: "all", mode: "all" }, sort = { key: "score", dir: -1 }, openId = null;
 const $ = (id) => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => {
   const n = document.createElement(tag);
@@ -111,9 +112,19 @@ const today = () => new Date().toISOString().slice(0, 10);
 function notice(text, err) { const n = $("notice"); n.hidden = !text; n.textContent = text || ""; n.classList.toggle("err", !!err); }
 
 const byStatus = (j) => filter === "all" || (filter === "active" ? ACTIVE.includes(j.status) : j.status === filter);
+// `office` is free text from /scan; any remote option counts as Remote.
+const mode = (j) => {
+  const o = (j.office || "").toLowerCase();
+  return /remote/.test(o) ? "Remote" : /hybrid/.test(o) ? "Hybrid" : /on-site|onsite|in-office|in office/.test(o) ? "On-site" : "Unknown";
+};
+const FACETS = [
+  { key: "stack", nav: "stacks", label: "Stack", values: (j) => j.stack || [] },
+  { key: "mode", nav: "modes", label: "Office", values: (j) => [mode(j)] },
+];
+const byFacets = (j) => FACETS.every((f) => facets[f.key] === "all" || f.values(j).includes(facets[f.key]));
 
 function visible() {
-  const list = jobs.filter((j) => byStatus(j) && (stackFilter === "all" || (j.stack || []).includes(stackFilter)));
+  const list = jobs.filter((j) => byStatus(j) && byFacets(j));
   const { key, dir } = sort;
   return list.sort((a, b) => {
     const x = a[key] ?? "", y = b[key] ?? "";
@@ -131,16 +142,18 @@ function renderChips() {
     b.onclick = () => { filter = k; render(); };
     return b;
   }));
-  const counts = {};
-  for (const j of jobs.filter(byStatus)) for (const s of j.stack || []) counts[s] = (counts[s] || 0) + 1;
-  const stacks = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  $("stacks").hidden = !stacks.length;
-  $("stacks").replaceChildren(el("span", { class: "chips-label" }, "Stack"),
-    ...[["all", "Any", jobs.filter(byStatus).length], ...stacks.map(([s, n]) => [s, s, n])].map(([k, label, n]) => {
-      const b = el("button", { class: "chip", "aria-pressed": String(stackFilter === k), type: "button" }, label, el("span", { class: "n" }, String(n)));
-      b.onclick = () => { stackFilter = k; render(); };
-      return b;
-    }));
+  for (const f of FACETS) {
+    const pool = jobs.filter(byStatus), counts = {};
+    for (const j of pool) for (const v of f.values(j)) counts[v] = (counts[v] || 0) + 1;
+    const vals = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    $(f.nav).hidden = !vals.length;
+    $(f.nav).replaceChildren(el("span", { class: "chips-label" }, f.label),
+      ...[["all", "Any", pool.length], ...vals.map(([v, n]) => [v, v, n])].map(([k, label, n]) => {
+        const b = el("button", { class: "chip", "aria-pressed": String(facets[f.key] === k), type: "button" }, label, el("span", { class: "n" }, String(n)));
+        b.onclick = () => { facets[f.key] = k; render(); };
+        return b;
+      }));
+  }
   const applied = jobs.filter((j) => ["applied", "interview", "offer"].includes(j.status)).length;
   $("summary").textContent = jobs.length
     ? `${jobs.length} jobs tracked · ${count("new")} new to review · ${applied} in progress`

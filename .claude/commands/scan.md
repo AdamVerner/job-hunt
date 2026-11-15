@@ -16,7 +16,7 @@ List the tracker's `jobs` collection with the ArtifactData tool, reading every p
 
 ## 2. Collect (one subagent per source, in parallel)
 
-Run collectors with `model: "haiku"`: the work is mechanical, and collection is most of a scan's tokens. Scoring stays in the main session so scores stay consistent.
+Run collectors with `model: "sonnet"`. In a side-by-side run on one source, Haiku dropped required fields and used more tokens. Scoring stays in the main session so scores stay consistent.
 
 Give each subagent:
 - its row from `sources.md`
