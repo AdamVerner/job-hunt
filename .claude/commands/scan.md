@@ -32,7 +32,7 @@ Each subagent:
 
    If the source fails (blocked, changed layout), return `{"error": "..."}` instead.
 
-Doc id: `<company>--<title>`, lowercase, ASCII, non-alphanumerics -> `-`, cut to 120 chars. The same job on two sites gets the same id, so merge it into one job with both links.
+Collect the subagents' JSON into files instead of retyping it. Normalize ids yourself: `<company>--<title>`, ASCII-folded, lowercase, non-alphanumerics -> `-`, cut to 120 chars, with legal suffixes (s.r.o., a.s., Inc.) and any "(...)" stripped from the company. Agents disagree on the format. The same job on two sites gets the same id, so merge it into one job with both links.
 
 ## 3. Judge
 
@@ -48,7 +48,7 @@ Document body:
  "status": "new", "found": "YYYY-MM-DD", "summary": "", "notes": []}
 ```
 
-Write new jobs with ArtifactData `batch` (`set` per doc, at most 50 per batch). Never overwrite an existing doc: it holds the user's status and notes.
+Write each document to a JSON file in the scratchpad. Then write them with ArtifactData `batch`, using `set` and `file_path` per entry, at most 50 per batch. Never overwrite an existing doc: it holds the user's status and notes.
 
 ## 4. Report
 
