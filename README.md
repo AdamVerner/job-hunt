@@ -16,4 +16,14 @@ tracker page on claude.ai where you log each application.
 - On the tracker page, open a row to change its status and add notes.
 - Or tell Claude, for example "applied to Acme, recruiter call Tuesday", and it updates the row.
 
-Sources are tuned for Prague. Edit `sources.md` for another city.
+## Your own expectations
+
+Everything personal is in `profile.md`:
+- **Search:** city, remote scope and search terms
+- **Dealbreakers:** jobs that never reach the board
+- **Preferences:** set the 1-5 score
+- **Flags:** labels shown on rows
+
+Keep dealbreakers few. Filter the rest on the board.
+
+`sources.md` has sources that work anywhere, plus a Czech section that is skipped outside Czechia. To add a site for your country, add a row with its search URL.

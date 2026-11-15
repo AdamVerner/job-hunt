@@ -3,6 +3,10 @@
 Copy this file to `profile.md` and fill it in, or ask Claude: "draft my profile.md from my CV".
 `profile.md` is gitignored. `/scan` reads it on every run.
 
+Keep **Dealbreakers** short. A dealbreaker removes a job from the board, so you never see it.
+Everything else belongs under **Preferences**. A preference lowers the score and adds a flag,
+and you decide on the board with its filters (status, stack, office, source).
+
 ## Tracker
 - URL: (left empty - `/scan` publishes the tracker on first run and writes the URL here)
 
@@ -13,25 +17,29 @@ Copy this file to `profile.md` and fill it in, or ask Claude: "draft my profile.
 - Preferred skills:
 - Spoken languages:
 
-## Hard filters
-A job failing any of these is saved as `dropped` with the reason.
-- Location: e.g. Prague on-site or hybrid; fully remote from EU
-- Pay floor: e.g. 100k CZK/month gross employment, or 6k CZK/day contract
-- Dealbreakers: e.g. 4+ days a week in office
-- Contract form: employment / contract / both
+## Search
+- City: e.g. Prague (used in source URLs, see `sources.md`)
+- Remote: e.g. also fully remote within the EU / no
+- Terms: keywords used on every source, e.g. python, .NET, backend, fullstack
 
-## Search terms
-Keywords used on every source, e.g. python, .NET, C#, backend, fullstack
+## Dealbreakers
+A job matching any of these is saved as `dropped` with the reason, so it won't come back.
+- e.g. Pay range tops out below 100k CZK/month gross employment, or 6k CZK/day contract
+- e.g. Junior or medior roles
+- e.g. Roles in Java, PHP only
 
-## Ranking (most important first)
-Used to score 1-5. Example:
-1. Pay at or above the floor (unknown pay is neutral, flagged)
-2. Interesting engineering
-3. Prefer C# over Python
-4. Prague over remote at equal pay
+## Preferences (most important first)
+Used to score 1-5. Never drops a job.
+1. e.g. Pay well above the floor (unknown pay is neutral)
+2. e.g. Interesting engineering over CRUD and maintenance
+3. e.g. Prefer C# over Python
+4. e.g. At most 3 office days a week; on-site scores lower
+5. e.g. Local over remote at equal pay
 
 ## Flags
-Shown on the row, not a reason to drop. Example:
+Short labels shown on a row. Examples:
 - No pay stated
 - Office policy unclear
-- Direct foreign employment without Czech payroll or EOR (tax and social-insurance admin falls on you)
+- On-site
+- Agency
+- Direct foreign employment without local payroll or EOR

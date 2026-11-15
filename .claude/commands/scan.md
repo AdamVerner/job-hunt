@@ -20,12 +20,12 @@ Run collectors with `model: "sonnet"`. In a side-by-side run on one source, Haik
 
 Give each subagent:
 - its row from `sources.md`
-- the search terms, hard filters and location from `profile.md`
+- the Search section and the Dealbreakers from `profile.md`
 - the seen doc ids
 
 Each subagent:
 1. Reads the list pages for every search term.
-2. Drops jobs whose doc id is already seen, then obvious mismatches by title, seniority or location.
+2. Drops jobs whose doc id is already seen, jobs outside the city and remote scope, and jobs that clearly hit a dealbreaker. Never drop for a preference: office policy, stack preference and domain are judged later.
 3. Opens each survivor's detail page and extracts pay and office policy.
 4. Returns JSON only, one object per job:
    `{id, company, title, link, source, location, office, pay, stack, description_summary}`
@@ -40,8 +40,8 @@ Collect the subagents' JSON into files instead of retyping it. Normalize ids you
 ## 3. Judge
 
 For each new job:
-- **Hard filters fail** (pay range top below the floor, dealbreaker office policy, wrong location or seniority): `status: "dropped"`, `why` = the reason.
-- **Otherwise:** `status: "new"`, `score` 1-5 by the ranking in `profile.md`, `why` = one line on what makes it a fit or not.
+- **A dealbreaker in `profile.md` applies:** `status: "dropped"`, `why` = the reason.
+- **Otherwise:** `status: "new"`, `score` 1-5 by the Preferences in `profile.md`, `why` = one line on what makes it a fit or not. Preferences change the score, never the status. The user filters by status, stack, office and source on the board.
 - **Add flags** from the profile's flag list.
 
 Document body:
