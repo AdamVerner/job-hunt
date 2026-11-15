@@ -35,6 +35,7 @@ The companies listed in `profile.md` > Companies to watch. Read every opening, r
 | Greenhouse | `https://boards-api.greenhouse.io/v1/boards/<slug>/jobs` (`?content=true` adds descriptions) | Public JSON. |
 | Lever | `https://api.lever.co/v0/postings/<slug>?mode=json` | Public JSON. |
 | Ashby | `https://api.ashbyhq.com/posting-api/job-board/<slug>` | Public JSON with location and remote flags. |
+| Recruitee | `https://<slug>.recruitee.com/api/offers/` | Public JSON. |
 | Own careers page | the URL in the profile | Fetch the HTML and open each engineering opening. |
 
 Not used: Wellfound (generic sample without login), WeWorkRemotely (403).
