@@ -48,6 +48,8 @@ tr.row.open td { background: var(--accent-soft); border-bottom-color: transparen
 .st-applied, .st-interview { border-color: var(--accent); color: var(--accent); }
 .st-offer { background: var(--good); border-color: var(--good); color: var(--bg); }
 .st-rejected, .st-dropped { color: var(--muted); text-decoration: line-through; }
+.chips-label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); align-self: center; margin-right: 4px; }
+.tech { display: inline-block; font: 500 11px var(--mono); color: var(--accent); background: var(--accent-soft); border-radius: 4px; padding: 0 5px; margin: 2px 4px 0 0; }
 .flag { display: inline-block; font-size: 11px; color: var(--warn); border: 1px solid currentColor; border-radius: 4px; padding: 0 5px; margin: 2px 4px 0 0; }
 td.detail { padding: 4px 12px 16px; }
 .detail-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 20px; }
@@ -73,6 +75,7 @@ button.primary:disabled { opacity: .5; cursor: default; }
     <p class="sub" id="summary">Loading jobs…</p>
   </header>
   <nav class="chips" id="chips" aria-label="Filter by status"></nav>
+  <nav class="chips" id="stacks" aria-label="Filter by technology"></nav>
   <p class="notice" id="notice" hidden></p>
   <div class="tablewrap">
     <table>
@@ -94,7 +97,7 @@ const COLS = [
   { key: "found", label: "Found" },
 ];
 
-let db = null, jobs = [], filter = "active", sort = { key: "score", dir: -1 }, openId = null;
+let db = null, jobs = [], filter = "active", stackFilter = "all", sort = { key: "score", dir: -1 }, openId = null;
 const $ = (id) => document.getElementById(id);
 const el = (tag, attrs = {}, ...kids) => {
   const n = document.createElement(tag);
@@ -107,8 +110,10 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 function notice(text, err) { const n = $("notice"); n.hidden = !text; n.textContent = text || ""; n.classList.toggle("err", !!err); }
 
+const byStatus = (j) => filter === "all" || (filter === "active" ? ACTIVE.includes(j.status) : j.status === filter);
+
 function visible() {
-  const list = jobs.filter((j) => filter === "all" || (filter === "active" ? ACTIVE.includes(j.status) : j.status === filter));
+  const list = jobs.filter((j) => byStatus(j) && (stackFilter === "all" || (j.stack || []).includes(stackFilter)));
   const { key, dir } = sort;
   return list.sort((a, b) => {
     const x = a[key] ?? "", y = b[key] ?? "";
@@ -126,6 +131,16 @@ function renderChips() {
     b.onclick = () => { filter = k; render(); };
     return b;
   }));
+  const counts = {};
+  for (const j of jobs.filter(byStatus)) for (const s of j.stack || []) counts[s] = (counts[s] || 0) + 1;
+  const stacks = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  $("stacks").hidden = !stacks.length;
+  $("stacks").replaceChildren(el("span", { class: "chips-label" }, "Stack"),
+    ...[["all", "Any", jobs.filter(byStatus).length], ...stacks.map(([s, n]) => [s, s, n])].map(([k, label, n]) => {
+      const b = el("button", { class: "chip", "aria-pressed": String(stackFilter === k), type: "button" }, label, el("span", { class: "n" }, String(n)));
+      b.onclick = () => { stackFilter = k; render(); };
+      return b;
+    }));
   const applied = jobs.filter((j) => ["applied", "interview", "offer"].includes(j.status)).length;
   $("summary").textContent = jobs.length
     ? `${jobs.length} jobs tracked · ${count("new")} new to review · ${applied} in progress`
@@ -184,6 +199,7 @@ function render() {
     const tr = el("tr", { class: "row" + (openId === j.id ? " open" : ""), tabindex: "0", "aria-expanded": String(openId === j.id) },
       el("td", {}, el("span", { class: "score s" + (j.score || 0) }, String(j.score ?? "-"))),
       el("td", {}, el("div", { class: "co" }, j.company || "?"), el("div", { class: "role" }, j.title || ""),
+        ...(j.stack || []).map((s) => el("span", { class: "tech" }, s)),
         ...(j.flags || []).map((f) => el("span", { class: "flag" }, f))),
       el("td", {}, j.office || "unknown"),
       el("td", { class: "pay-" + (j.pay_ok || "unknown") }, j.pay || "not stated"),

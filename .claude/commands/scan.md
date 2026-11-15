@@ -16,6 +16,8 @@ List the tracker's `jobs` collection with the ArtifactData tool, reading every p
 
 ## 2. Collect (one subagent per source, in parallel)
 
+Run collectors with `model: "haiku"`: the work is mechanical, and collection is most of a scan's tokens. Scoring stays in the main session so scores stay consistent.
+
 Give each subagent:
 - its row from `sources.md`
 - the search terms, hard filters and location from `profile.md`
@@ -26,7 +28,8 @@ Each subagent:
 2. Drops jobs whose doc id is already seen, then obvious mismatches by title, seniority or location.
 3. Opens each survivor's detail page and extracts pay and office policy.
 4. Returns JSON only, one object per job:
-   `{id, company, title, link, source, location, office, pay, description_summary}`
+   `{id, company, title, link, source, location, office, pay, stack, description_summary}`
+   - `stack`: the main languages or platforms the job needs, most important first, with canonical names: Python, C#, Java, Kotlin, Go, Rust, TypeScript, PHP, Ruby, Elixir, C/C++, Swift. Use .NET -> C# and Node/React -> TypeScript. Anything else goes under its common name.
    - `office`: "on-site", "hybrid N days", "remote", or "unknown"
    - `description_summary`: at most 3 lines on what the work is
 
@@ -44,7 +47,7 @@ For each new job:
 Document body:
 ```json
 {"company": "", "title": "", "links": [""], "source": "", "location": "", "office": "",
- "pay": "", "pay_ok": "yes|no|unknown", "score": 3, "why": "", "flags": [],
+ "pay": "", "pay_ok": "yes|no|unknown", "stack": [], "score": 3, "why": "", "flags": [],
  "status": "new", "found": "YYYY-MM-DD", "summary": "", "notes": []}
 ```
 
