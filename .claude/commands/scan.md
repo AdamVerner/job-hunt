@@ -6,13 +6,10 @@ Read `profile.md` and `sources.md`. If `profile.md` is missing, stop and offer t
 
 ## 1. Tracker
 
-If `profile.md` has no tracker URL, publish `tracker/index.html` with the Artifact tool:
-- `capabilities: {"db": {}}`
-- `icon: "briefcase"`
-
-Then write the returned URL into `profile.md`.
-
-List the tracker's `jobs` collection with the ArtifactData tool, reading every page. Keep the existing doc ids: these are the jobs already seen.
+The tracker is `tracker/server.py`, serving the board and a JSON API on the URL in `profile.md` (default `http://127.0.0.1:20210`).
+- If `curl -sf <url>/api/jobs` fails, start it with `docker compose up -d`, or `python3 tracker/server.py &` without Docker.
+- Back up before writing anything: `python3 tracker/server.py backup` (prints the backup path).
+- `GET <url>/api/jobs` lists every job. Their `id`s are the jobs already seen.
 
 ## 2. Collect (one subagent per source, in parallel)
 
@@ -51,7 +48,7 @@ Document body:
  "status": "new", "found": "YYYY-MM-DD", "summary": "", "notes": []}
 ```
 
-Write each document to a JSON file in the scratchpad. Then write them with ArtifactData `batch`, using `set` and `file_path` per entry, at most 50 per batch. Never overwrite an existing doc: it holds the user's status and notes.
+Write all new documents, each with its `id`, as one JSON array to a file in the scratchpad. Then `curl -sf -X POST <url>/api/jobs -H 'Content-Type: application/json' --data @<file>`. The server never overwrites an existing id: that job holds the user's status and notes. To change an existing job, for example when the user says they applied, use `PATCH <url>/api/jobs/<id>` with only the changed fields.
 
 ## 4. Report
 
@@ -59,4 +56,4 @@ In chat:
 - jobs found, new, dropped
 - the top 5 new by score, each as one line with a link
 - every source that failed and why
-- the tracker URL
+- the tracker URL and the backup path

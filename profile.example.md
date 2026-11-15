@@ -8,7 +8,7 @@ Everything else belongs under **Preferences**. A preference lowers the score and
 and you decide on the board with its filters (status, stack, office, source).
 
 ## Tracker
-- URL: (left empty - `/scan` publishes the tracker on first run and writes the URL here)
+- URL: http://127.0.0.1:20210 (the local tracker server, see README)
 
 ## About me
 - CV: `cv.pdf` (in this folder, gitignored; read only when drafting or updating this profile)

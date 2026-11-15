@@ -1,0 +1,17 @@
+# Live data sits outside ~/work so mutagen never syncs jobs.json mid-write.
+services:
+  tracker:
+    image: python:3.14-alpine
+    restart: unless-stopped
+    logging:
+      options: { max-size: 10m, max-file: "3" }
+    command: ["python", "/app/server.py", "serve", "--host", "0.0.0.0", "--port", "8080"]
+    environment:
+      DATA_DIR: /data
+      BACKUP_DIR: /backups
+    volumes:
+      - ./tracker:/app:ro
+      - ${DATA_DIR:-${HOME}/data/job-hunt}:/data
+      - ./backups:/backups
+    ports:
+      - "127.0.0.1:${PORT:-20210}:8080"
