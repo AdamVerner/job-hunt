@@ -15,6 +15,8 @@ The tracker is `tracker/server.py`, serving the board and a JSON API on the URL 
 
 Run collectors with `model: "sonnet"`. In a side-by-side run on one source, Haiku dropped required fields and used more tokens. Scoring stays in the main session so scores stay consistent.
 
+Run one more collector for the Companies to watch in `profile.md`: every engineering opening there, judged by the same dealbreakers but not filtered by search terms.
+
 Give each subagent:
 - its row from `sources.md`
 - the Search section and the Dealbreakers from `profile.md`

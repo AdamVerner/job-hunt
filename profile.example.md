@@ -22,6 +22,11 @@ and you decide on the board with its filters (status, stack, office, source).
 - Remote: e.g. also fully remote within the EU / no
 - Terms: keywords used on every source, e.g. python, .NET, backend, fullstack
 
+## Companies to watch
+`/scan` reads every opening at these companies, even ones no search term matches. Give the careers page,
+or the job board if you know it (Greenhouse, Lever or Ashby slug).
+- e.g. Acme - https://boards-api.greenhouse.io/v1/boards/acme/jobs
+
 ## Dealbreakers
 A job matching any of these is saved as `dropped` with the reason, so it won't come back.
 - e.g. Pay range tops out below 100k CZK/month gross employment, or 6k CZK/day contract

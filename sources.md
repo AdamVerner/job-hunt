@@ -11,7 +11,7 @@ Placeholders, filled from `profile.md` > Search:
 
 | Source | List URL | Detail page | Read with | Notes |
 |---|---|---|---|---|
-| LinkedIn | `https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={q}&location={city}&start=0` (pages of 10: start=10, 20...) | `linkedin.com/jobs/view/<id>` | fetch | Cards lack pay and office policy; the detail page has the full text. For remote add `&f_WT=2` and set `location` to the remote region, e.g. `European%20Union`. |
+| LinkedIn | `https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={q}&location={city}&start=0` (pages of 10: start=10, 20...) | `linkedin.com/jobs/view/<id>` | fetch | Page until a page is empty or 10 pages are read; the first 2 pages miss most of a big city. After the first scan add `&f_TPR=r604800` (posted in the last 7 days) so rescans stay cheap. Cards lack pay and office policy; the detail page has the full text. For remote add `&f_WT=2` and set `location` to the remote region, e.g. `European%20Union`. |
 | HN Who is hiring | `https://hn.algolia.com/api/v1/search_by_date?tags=story,author_whoishiring&query=hiring` -> newest "Who is hiring?" story; comments via `https://hn.algolia.com/api/v1/items/<id>` | the comment | fetch (JSON) | One thread per month. Scan only top-level comments mentioning remote in the user's region, or `{city}`. |
 | RemoteOK | `https://remoteok.com/api` | `url` field | fetch (JSON) | Remote only. First element is metadata. Filter by `tags` and `location`. Low yield. |
 
@@ -25,5 +25,16 @@ Skip this section when the profile's city is not in Czechia.
 | jobstack.it | `https://www.jobstack.it/it-jobs/<category>/{city_cz}`, categories such as `python-developer`, `dot-net-developer`, `java-developer`, `full-stack-developer` | `/it-job/<category>/<hash>` | fetch | List shows level, pay, Hybrid/Remote. An unknown category returns the generic city list, not a 404; check category names on the site. |
 | cocuma.cz | `https://www.cocuma.cz/jobs/`, `/jobs/page/<n>/` | `/job/<slug>/<id>/` | fetch | Search params are ignored; browse all pages and filter by title and location. Small (~265 jobs). |
 | startupjobs.cz | `POST https://back.startupjobs.cz/api/search-offers?page=N`, JSON body `{"query":"{q}","locationPreferences":["remote","hybrid","onsite"],"locations":[{"locationId":"<id>","radiusKm":20}]}` | `GET https://back.startupjobs.cz/api/offers/{id}`; public link `https://www.startupjobs.cz/nabidka/{id}/{slug}` | fetch (JSON, curl) | Find `<id>` with `POST https://back.startupjobs.cz/api/search-offers/locations-autocomplete?name={city_cz}&locale=cs&types[]=place`. Prague is `ChIJi3lwCZyTC0cRkEAWZg-vAAQ`. Salary min/max are in hundredths. Search is fuzzy: `.NET` and `C#` return mostly noise. |
+
+## Watched companies
+
+The companies listed in `profile.md` > Companies to watch. Read every opening, regardless of search terms: firms that post only on their own site never show up in keyword searches.
+
+| Board | List URL | Notes |
+|---|---|---|
+| Greenhouse | `https://boards-api.greenhouse.io/v1/boards/<slug>/jobs` (`?content=true` adds descriptions) | Public JSON. |
+| Lever | `https://api.lever.co/v0/postings/<slug>?mode=json` | Public JSON. |
+| Ashby | `https://api.ashbyhq.com/posting-api/job-board/<slug>` | Public JSON with location and remote flags. |
+| Own careers page | the URL in the profile | Fetch the HTML and open each engineering opening. |
 
 Not used: Wellfound (generic sample without login), WeWorkRemotely (403).
